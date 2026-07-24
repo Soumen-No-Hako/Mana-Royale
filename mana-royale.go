@@ -4,6 +4,7 @@ import (
     "fmt"
     "ManaRoyale/entity"
     "ManaRoyale/util"
+    "ManaRoyale/llmEngine"
 )
 
 func main() {
@@ -49,6 +50,7 @@ func main() {
                break
            }
         }
+        llmEngine.GenOllamaResp()
         fmt.Printf("You selected card %s\n", cards[pickedCards[ind-1]].Name)
     }
 }

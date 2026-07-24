@@ -1,4 +1,4 @@
-package main
+package llmEngine
 
 import (
 	"bufio"
@@ -14,6 +14,7 @@ type OllamaRequest struct {
 	Prompt string `json:"prompt"`
 	Stream bool   `json:"stream"`
         System string `json:"system"`
+        Options OllamaOptions `json:"options"`
 }
 
 type OllamaResponse struct {
@@ -22,15 +23,25 @@ type OllamaResponse struct {
 	Response  string `json:"response"`
 	Done      bool   `json:"done"`
 }
+type OllamaOptions struct {
+        temp float64 `json:"temperature"`
+        ctx int `json:"num_ctx"`
+}
 
-func main() {
+func GenOllamaResp() {
 	url := "http://localhost:11434/api/generate"
-	
+	reqOptions := OllamaOptions {
+                temp: 0.25,
+                ctx : 2048,
+        }
+
 	reqBody := OllamaRequest{
 		Model:  "llama3.2",
-		Prompt: "Explain quantum computing in one sentence.",
+		Prompt: "Explain differential calculus in one sentence.",
 		Stream: true,
-	}
+                System: "You are a helpful assistant\n",
+                Options: reqOptions,
+	} 
 	
 	jsonData, err := json.Marshal(reqBody)
 	if err != nil {
