@@ -10,6 +10,7 @@ import (
 //Write the code for ollama templatefile parsing
 
 func ParseModelFile(FilePath string) map[string]any {
+        //No need for map. Just use the Ollama objects from OllamaEngine
 	OllamaFieldMap := make(map[string]any)
 	inSystemBlock := false
 	inTemplateBlock := false

@@ -57,6 +57,11 @@ type OllamaOptions struct {
 	NumThread        int      `json:"num_thread"`        // Allocates the number of CPU threads utilized for compute operations.
 }
 
+func GetModelFromFile(filepath string) {
+	OllamaModelFileMap := ParseModelFile(filepath)
+	// Write the logic to parse data from file
+}
+
 func GenOllamaResp() {
 	url := "http://localhost:11434/api/generate"
 	reqOptions := OllamaOptions {
