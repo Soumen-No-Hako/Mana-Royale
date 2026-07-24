@@ -43,6 +43,7 @@ func main() {
         //fmt.Printf("Card came as %s\n", cards[cardIndex].Name)
         fmt.Printf("Please pick a card, %s now!!!\n", players[0].Name)
         ind = pick+1
+        llmEngine.GenOllamaResp()
         for ; ind > pick ; {
            fmt.Printf("Pick a number between 1-%d\n", pick)
            _, err := fmt.Scan(&ind)
@@ -50,7 +51,6 @@ func main() {
                break
            }
         }
-        llmEngine.GenOllamaResp()
-        fmt.Printf("You selected card %s\n", cards[pickedCards[ind-1]].Name)
+        fmt.Printf("You selected spell %s\n", cards[pickedCards[ind-1]].Name)
     }
 }

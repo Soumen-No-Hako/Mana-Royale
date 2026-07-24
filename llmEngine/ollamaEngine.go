@@ -24,22 +24,22 @@ type OllamaResponse struct {
 	Done      bool   `json:"done"`
 }
 type OllamaOptions struct {
-        temp float64 `json:"temperature"`
-        ctx int `json:"num_ctx"`
+        Temp float64 `json:"temperature"`
+        Ctx int `json:"num_ctx"`
 }
 
 func GenOllamaResp() {
 	url := "http://localhost:11434/api/generate"
 	reqOptions := OllamaOptions {
-                temp: 0.25,
-                ctx : 2048,
+                Temp: 0.75,
+                Ctx : 2048,
         }
 
 	reqBody := OllamaRequest{
 		Model:  "llama3.2",
-		Prompt: "Explain differential calculus in one sentence.",
+		Prompt: "Player prepares to choose a magic spell",
 		Stream: true,
-                System: "You are a helpful assistant\n",
+                System: "You are a Antagonist character of a Game set in a dystopian Hellish world. you are the devil. You intimidate the player by talking trash. You are in a game and influence the player to give up. Use single sentence to strike fear and helplessness. Use all kinds of psychological tactics to manupulate choosing the wrong decision.\n",
                 Options: reqOptions,
 	} 
 	
@@ -69,7 +69,12 @@ func GenOllamaResp() {
 		fmt.Fprintf(os.Stderr, "Unexpected status code: %d\n", resp.StatusCode)
 		os.Exit(1)
 	}
-
+        // Print fields without draining the body buffer
+	/* fmt.Printf("Method: %s\n", req.Method)
+	fmt.Printf("URL: %s\n", req.URL.String())
+        fmt.Printf("Headers: %v\n", req.Header)
+        fmt.Printf("Body: %s\n", string(jsonData)) 
+        */
 	scanner := bufio.NewScanner(resp.Body)
 	for scanner.Scan() {
 		line := scanner.Bytes()
