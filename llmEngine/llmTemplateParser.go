@@ -70,9 +70,16 @@ func ParseModelFile(FilePath string) OllamaRequest {
 	return ParsedOllamaReq
 }
 func GetParam(opts *OllamaOptions, line string) {
-	trimmedLine := strings.TrimPrefix(line, "PARAMATER ")
-	segment := strings.Split(trimmedLine, " ")
-	FieldMap[segment[0]] = segment[1]
+	if !strings.HasPrefix(line, "PARAMETER ") {
+		return
+	}
+
+	trimmedLine := strings.TrimPrefix(line, "PARAMETER ")
+	segment := strings.SplitN(strings.TrimSpace(trimmedLine), " ", 2)
+	
+	if len(parts) < 2 {
+		return
+	}
 	key := strings.ToLower(segment[0])
 	valStr := strings.TrimSpace(segment[1])
 	// Modelfile strings are often quoted
