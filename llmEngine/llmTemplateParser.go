@@ -5,13 +5,16 @@ import (
 	"bufio"
 	"strings"
 	"log"
+	"strconv"
 )
 
 //Write the code for ollama templatefile parsing
 
-func ParseModelFile(FilePath string) map[string]any {
+func ParseModelFile(FilePath string) OllamaRequest {
         //No need for map. Just use the Ollama objects from OllamaEngine
-	OllamaFieldMap := make(map[string]any)
+	ParsedOllamaReq := OllamaRequest{}
+	ParsedOllamaOptions := OllamaOptions{}
+	//OllamaFieldMap := make(map[string]any)
 	inSystemBlock := false
 	inTemplateBlock := false
         file, err := os.Open(FilePath)
@@ -26,19 +29,19 @@ func ParseModelFile(FilePath string) map[string]any {
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "PARAMETER") {
-			GetParam(OllamaFieldMap, line)
+			GetParam(&ParsedOllamaOptions, line)
 		}
 		else if strings.HasPrefix(line, `SYSTEM """`) {
 			inSystemBlock = true
 		}
 		else if strings.HasPrefix(line, "SYSTEM ") {
-			OllamaFieldMap["system"] = strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(line, "SYSTEM "),`"`))
+			ParsedOllamaReq.System = strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(line, "SYSTEM "),`"`))
 		}
 		else if strings.HasPrefix(line, `TEMPLATE """`) {
                         inTemplateBlock = true
                 }
                 else if strings.HasPrefix(line, "TEMPLATE ") {
-			OllamaFieldMap["template"] = strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(line, "TEMPLATE "),`"`))
+			ParsedOllamaReq.Template = strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(line, "TEMPLATE "),`"`))
                 }
 		else {
 			if !strings.HasPrefix(line, `"""`) && inSystemBlock {
@@ -49,22 +52,114 @@ func ParseModelFile(FilePath string) map[string]any {
 			}
 			else {
 				if strings.HasPrefix(`"""`) && inSystemBlock {
-					OllamaFieldMap["system"] = multline
+					//OllamaFieldMap["system"] = multline
+					ParsedOllamaReq.System = multline
 					multline = ""
 					inSystemBlock = false
 				}
 				if strings.HasPrefix(`"""`) && inTemplateBlock {
-                                        OllamaFieldMap["template"] = multline
-                                        multline = ""
+                                        //OllamaFieldMap["template"] = multline
+                                        ParsedOllamaReq.Template = multline
+					multline = ""
                                         inTemplateBlock = false
                                 }
 			}
 		}
 	}
-	return OllamaFieldMap
+	ParsedOllamaReq.OllamaOptions = ParsedOllamaOptions
+	return ParsedOllamaReq
 }
-func GetParam(FieldMap map[string]any, line string) {
+func GetParam(opts *OllamaOptions, line string) {
 	trimmedLine := strings.TrimPrefix(line, "PARAMATER ")
 	segment := strings.Split(trimmedLine, " ")
 	FieldMap[segment[0]] = segment[1]
+	key := strings.ToLower(segment[0])
+	valStr := strings.TrimSpace(segment[1])
+	// Modelfile strings are often quoted
+	valStr = strings.Trim(valStr, `"'`)
+
+	switch key {
+	case "num_keep":
+		opts.NumKeep = parseInt(valStr)
+	case "seed":
+		opts.Seed = parseInt(valStr)
+	case "num_predict":
+		opts.NumPredict = parseInt(valStr)
+	case "top_k":
+		opts.TopK = parseInt(valStr)
+	case "top_p":
+		opts.TopP = parseFloat(valStr)
+	case "min_p":
+		opts.MinP = parseFloat(valStr)
+	case "tfs_z":
+		opts.TfsZ = parseFloat(valStr)
+	case "typical_p":
+		opts.TypicalP = parseFloat(valStr)
+	case "repeat_last_n":
+		opts.RepeatLastN = parseInt(valStr)
+	case "temperature":
+		opts.Temp = parseFloat(valStr)
+	case "repeat_penalty":
+		opts.RepeatPenalty = parseFloat(valStr)
+	case "presence_penalty":
+		opts.PresencePenalty = parseFloat(valStr)
+	case "frequency_penalty":
+		opts.FrequencyPenalty = parseFloat(valStr)
+	case "mirostat":
+		opts.Mirostat = parseInt(valStr)
+	case "mirostat_tau":
+		opts.MirostatTau = parseFloat(valStr)
+	case "mirostat_eta":
+		opts.MirostatEta = parseFloat(valStr)
+	case "penalize_newline":
+		opts.PenalizeNewline = parseBool(valStr)
+	case "stop":
+		opts.Stop = append(opts.Stop, valStr)
+	case "numa":
+		opts.Numa = parseBool(valStr)
+	case "num_ctx":
+		opts.Ctx = parseInt(valStr)
+	case "num_batch":
+		opts.NumBatch = parseInt(valStr)
+	case "num_gpu":
+		opts.NumGpu = parseInt(valStr)
+	case "main_gpu":
+		opts.MainGpu = parseInt(valStr)
+	case "low_vram":
+		opts.LowVram = parseBool(valStr)
+	case "vocab_only":
+		opts.VocabOnly = parseBool(valStr)
+	case "use_mmap":
+		opts.UseMmap = parseBool(valStr)
+	case "use_mlock":
+		opts.UseMlock = parseBool(valStr)
+	case "num_thread":
+		opts.NumThread = parseInt(valStr)
+	}
+}
+func parseInt(s string) int {
+	val, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		fmt.Printf("Error parsing int from %s: %v\n", s, err)
+		return 0
+	}
+	return int(val)
+}
+
+func parseFloat(s string) float64 {
+	val, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		fmt.Printf("Error parsing float from %s: %v\n", s, err)
+		return 0
+	}
+	return val
+}
+
+func parseBool(s string) bool {
+	val, err := strconv.ParseBool(s)
+	if err != nil {
+		fmt.Printf("Error parsing bool from %s: %v\n", s, err)
+		return false
+	}
+	return val
 }
