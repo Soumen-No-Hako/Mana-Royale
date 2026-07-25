@@ -44,10 +44,12 @@ func main() {
         //fmt.Printf("Card came as %s\n", cards[cardIndex].Name)
         fmt.Printf("Please pick a card, %s now!!!\n\n", players[0].Name)
         ind = pick+1
+	revealCards := ""
 	prompt := "Turn "+strconv.Itoa(i+1)+"\nDevil HP: "+strconv.Itoa(players[1].HP)+"; Spell DMG : "+strconv.Itoa(players[0].DPT)+"\n3 cards are dealt. Player has to choose between these hidden cards\nSecret info: "
 	for j:=1; j<=pick; j++ {
-		prompt = prompt + " Card "+strconv.Itoa(j)+" = " + cards[pickedCards[j-1]].Name + "; "
+		revealCards = revealCards + "Card "+strconv.Itoa(j)+" = " + cards[pickedCards[j-1]].Name + "; "
 	}
+	prompt = prompt + revealCards
         llmEngine.GenOllamaResp(prompt)
         for ; ind > pick ; {
            fmt.Printf("Pick a number between 1-%d\n", pick)
@@ -57,5 +59,6 @@ func main() {
            }
         }
         fmt.Printf("You selected spell %s\n", cards[pickedCards[ind-1]].Name)
+	fmt.Println("Revealed cards : ", revealCards)
     }
 }
