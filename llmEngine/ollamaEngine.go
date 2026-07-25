@@ -57,13 +57,13 @@ type OllamaOptions struct {
 	NumThread        *int      `json:"num_thread,omitentry"`        // Allocates the number of CPU threads utilized for compute operations.
 }
 
-func GenOllamaResp() {
+func GenOllamaResp(inp_prompt string) {
 	url := "http://localhost:11434/api/generate"
 
 	filepath := "./Templates/devil-modelfile"
 	reqBody := ParseModelFile(filepath)
 	reqBody.Model = "llama3.2" //to be dynamically created
-	reqBody.Prompt = "The Player is going to choose a card\nHP: 40; Turn: 5; Card 1 = Epic-Spell: Revoefil; Card 2 = Damage: -1.5x; Card 3 = Projectile-Spell: 50"
+	reqBody.Prompt = inp_prompt
 	reqBody.Stream = true
 	jsonData, err := json.Marshal(reqBody)
 	if err != nil {
@@ -77,10 +77,10 @@ func GenOllamaResp() {
 		os.Exit(1)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	fmt.Printf("Method: %s\n", req.Method)
+	fmt.Printf("\nMethod: %s\n", req.Method)
         fmt.Printf("URL: %s\n", req.URL.String())
         fmt.Printf("Headers: %v\n", req.Header)
-        fmt.Printf("Body: %s\n", string(jsonData))
+        fmt.Printf("Body: %s\n\n", string(jsonData))
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
