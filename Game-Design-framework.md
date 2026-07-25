@@ -8,9 +8,12 @@ Each turn Players will be presented with 3 cards.
 3 cards will contain different or same type of cards.
 
 Cards are categories in the following types - 
-1. Damage : -1.5x, -1x, 0x, 1x, 2x ( negative number means reduce damage to opponent)
-2. Projectile-Spell : 25, 50, 100, 200, 500
-3. Epic-Spell : Heal, Poison, Sleep, Hex, Revoefil
+1. Damage : -1.5x, -1x, 0x, 1x, 2x ( negative number means multiplier  reduce damage to opponent)
+2. Projectile-Spell : 25, 50, 100, 200, 500 (Direct damage to opponent)
+3. Epic-Spell : Heal, Poison, Sleep, Hex, Revoefil 
+
+Note: Hex reverses magic effects. Like poison falls on user itself, Heal deals damage to user. Basically user becomes the target.
+Note: Revoefil is instant-death to opponent. If Hex is active, user dies.
 
 3 cards can be of any combinations of these - 
 like - 
