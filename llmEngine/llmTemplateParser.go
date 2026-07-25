@@ -2,6 +2,7 @@ package llmEngine
 
 import (
 	"os"
+	"fmt"
 	"bufio"
 	"strings"
 	"log"
@@ -19,9 +20,8 @@ func ParseModelFile(FilePath string) OllamaRequest {
 	inTemplateBlock := false
         file, err := os.Open(FilePath)
 	if err != nil {
-		log.fatalf("Error while opening the file %v\n",err)
-		OllamaFieldMap["ERR"] := err
-		return OllamaFieldMap // Handle Err
+		log.Fatalf("Error while opening the file %v\n",err)
+		return ParsedOllamaReq
 	}
 	var multline string
 	defer file.Close()
@@ -30,34 +30,27 @@ func ParseModelFile(FilePath string) OllamaRequest {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "PARAMETER") {
 			GetParam(&ParsedOllamaOptions, line)
-		}
-		else if strings.HasPrefix(line, `SYSTEM """`) {
+		} else if strings.HasPrefix(line, `SYSTEM """`) {
 			inSystemBlock = true
-		}
-		else if strings.HasPrefix(line, "SYSTEM ") {
+		} else if strings.HasPrefix(line, "SYSTEM ") {
 			ParsedOllamaReq.System = strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(line, "SYSTEM "),`"`))
-		}
-		else if strings.HasPrefix(line, `TEMPLATE """`) {
+		} else if strings.HasPrefix(line, `TEMPLATE """`) {
                         inTemplateBlock = true
-                }
-                else if strings.HasPrefix(line, "TEMPLATE ") {
+                } else if strings.HasPrefix(line, "TEMPLATE ") {
 			ParsedOllamaReq.Template = strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(line, "TEMPLATE "),`"`))
-                }
-		else {
+                }else {
 			if !strings.HasPrefix(line, `"""`) && inSystemBlock {
 				multline = multline + line + "\n"
-			}
-			else if !strings.HasPrefix(line, `"""`) && inTemplateBlock {
+			} else if !strings.HasPrefix(line, `"""`) && inTemplateBlock {
 				multline = multline + line + "\n"
-			}
-			else {
-				if strings.HasPrefix(`"""`) && inSystemBlock {
+			} else {
+				if strings.HasPrefix(line, `"""`) && inSystemBlock {
 					//OllamaFieldMap["system"] = multline
 					ParsedOllamaReq.System = multline
 					multline = ""
 					inSystemBlock = false
 				}
-				if strings.HasPrefix(`"""`) && inTemplateBlock {
+				if strings.HasPrefix(line, `"""`) && inTemplateBlock {
                                         //OllamaFieldMap["template"] = multline
                                         ParsedOllamaReq.Template = multline
 					multline = ""
@@ -66,7 +59,7 @@ func ParseModelFile(FilePath string) OllamaRequest {
 			}
 		}
 	}
-	ParsedOllamaReq.OllamaOptions = ParsedOllamaOptions
+	ParsedOllamaReq.Options = ParsedOllamaOptions
 	return ParsedOllamaReq
 }
 func GetParam(opts *OllamaOptions, line string) {
@@ -77,7 +70,7 @@ func GetParam(opts *OllamaOptions, line string) {
 	trimmedLine := strings.TrimPrefix(line, "PARAMETER ")
 	segment := strings.SplitN(strings.TrimSpace(trimmedLine), " ", 2)
 	
-	if len(parts) < 2 {
+	if len(segment) < 2 {
 		return
 	}
 	key := strings.ToLower(segment[0])
@@ -144,29 +137,30 @@ func GetParam(opts *OllamaOptions, line string) {
 		opts.NumThread = parseInt(valStr)
 	}
 }
-func parseInt(s string) int {
+func parseInt(s string) *int {
 	val, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		fmt.Printf("Error parsing int from %s: %v\n", s, err)
-		return 0
+		return nil
 	}
-	return int(val)
+	addr := int(val)
+	return &addr
 }
 
-func parseFloat(s string) float64 {
+func parseFloat(s string) *float64 {
 	val, err := strconv.ParseFloat(s, 64)
 	if err != nil {
 		fmt.Printf("Error parsing float from %s: %v\n", s, err)
-		return 0
+		return nil
 	}
-	return val
+	return &val
 }
 
-func parseBool(s string) bool {
+func parseBool(s string) *bool {
 	val, err := strconv.ParseBool(s)
 	if err != nil {
 		fmt.Printf("Error parsing bool from %s: %v\n", s, err)
-		return false
+		return nil
 	}
-	return val
+	return &val
 }
