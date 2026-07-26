@@ -38,7 +38,9 @@ func ParseModelFile(FilePath string) OllamaRequest {
                         inTemplateBlock = true
                 } else if strings.HasPrefix(line, "TEMPLATE ") {
 			ParsedOllamaReq.Template = strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(line, "TEMPLATE "),`"`))
-                }else {
+                } else if strings.HasPrefix(line, "FROM "){
+			ParsedOllamaReq.Model = strings.TrimPrefix(line, "FROM ")	
+		} else {
 			if !strings.HasPrefix(line, `"""`) && inSystemBlock {
 				multline = multline + line + "\n"
 			} else if !strings.HasPrefix(line, `"""`) && inTemplateBlock {
